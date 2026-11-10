@@ -1,0 +1,127 @@
+
+public class Q1 {
+
+    static volatile String result;
+
+    // Approach 1: Using String
+    static String usingString(String[] fields) {
+        String ticket = "";
+
+        for (String field : fields) {
+            ticket = ticket + field + " | ";
+        }
+
+        return ticket;
+    }
+
+    // Approach 2: Using StringBuilder
+    static String usingStringBuilder(String[] fields) {
+        StringBuilder ticket = new StringBuilder();
+
+        for (String field : fields) {
+            ticket.append(field).append(" | ");
+        }
+
+        return ticket.toString();
+    }
+
+    // Approach 3: Using StringBuffer
+    static String usingStringBuffer(String[] fields) {
+        StringBuffer ticket = new StringBuffer();
+
+        for (String field : fields) {
+            ticket.append(field).append(" | ");
+        }
+
+        return ticket.toString();
+    }
+
+    interface TicketBuilder {
+        String build(String[] fields);
+    }
+
+    static void testWorkload(String workload, int tickets,
+                             int fieldCount, int repetitions) {
+
+        String[] fields = new String[fieldCount];
+
+        for (int i = 0; i < fieldCount; i++) {
+            fields[i] = "Field" + (i + 1);
+        }
+
+        TicketBuilder[] methods = {
+            Q1::usingString,
+            Q1::usingStringBuilder,
+            Q1::usingStringBuffer
+        };
+
+        String[] names = {
+            "String",
+            "StringBuilder",
+            "StringBuffer"
+        };
+
+        System.out.println("\nWorkload: " + workload);
+        System.out.println("Tickets: " + tickets);
+        System.out.println("Fields per ticket: " + fieldCount);
+
+        for (int m = 0; m < methods.length; m++) {
+
+            // Warm-up
+            for (int w = 0; w < 2; w++) {
+                for (int t = 0; t < tickets; t++) {
+                    result = methods[m].build(fields);
+                }
+            }
+
+            long totalTime = 0;
+
+            long memoryBefore = Runtime.getRuntime().totalMemory()
+                    - Runtime.getRuntime().freeMemory();
+
+            for (int r = 0; r < repetitions; r++) {
+
+                long start = System.nanoTime();
+
+                for (int t = 0; t < tickets; t++) {
+                    result = methods[m].build(fields);
+                }
+
+                long end = System.nanoTime();
+                totalTime += (end - start);
+            }
+
+            long memoryAfter = Runtime.getRuntime().totalMemory()
+                    - Runtime.getRuntime().freeMemory();
+
+            double averageTime =
+                    (totalTime / repetitions) / 1_000_000.0;
+
+            System.out.println("\nMethod: " + names[m]);
+            System.out.printf("Average Time: %.3f ms%n", averageTime);
+
+            System.out.println("Estimated intermediate String objects: "
+                    + (names[m].equals("String")
+                    ? (long) tickets * fieldCount
+                    : 0));
+
+            System.out.println("Approximate heap change: "
+                    + (memoryAfter - memoryBefore) + " bytes");
+
+            System.out.println("Last ticket length: " + result.length());
+        }
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("RAILWAY E-TICKET PERFORMANCE COMPARISON");
+
+        testWorkload("Small Workload", 1, 5, 5);
+
+        testWorkload("Large Workload", 10000, 50, 5);
+
+        testWorkload("Custom Workload", 1000, 100, 5);
+
+        System.out.println("\nExperiment Completed Successfully.");
+    }
+}
