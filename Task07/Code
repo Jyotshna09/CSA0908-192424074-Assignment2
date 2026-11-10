@@ -1,0 +1,152 @@
+
+import java.util.*;
+
+public class Q7 {
+
+    static final int REPETITIONS = 5;
+    static final int FRONT_OPERATIONS = 1000;
+
+    // Original design: ArrayList
+    static long testArrayList(int size) {
+
+        ArrayList<Integer> playlist = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            playlist.add(i);
+        }
+
+        long start = System.nanoTime();
+
+        // Add songs to the beginning
+        for (int i = 0; i < FRONT_OPERATIONS; i++) {
+            playlist.add(0, -i - 1);
+        }
+
+        // Remove songs from the beginning
+        for (int i = 0; i < FRONT_OPERATIONS; i++) {
+            playlist.remove(0);
+        }
+
+        return System.nanoTime() - start;
+    }
+
+    // Redesigned solution: ArrayDeque
+    static long testArrayDeque(int size) {
+
+        ArrayDeque<Integer> playlist = new ArrayDeque<>();
+
+        for (int i = 0; i < size; i++) {
+            playlist.addLast(i);
+        }
+
+        long start = System.nanoTime();
+
+        // Add songs to the beginning
+        for (int i = 0; i < FRONT_OPERATIONS; i++) {
+            playlist.addFirst(-i - 1);
+        }
+
+        // Remove songs from the beginning
+        for (int i = 0; i < FRONT_OPERATIONS; i++) {
+            playlist.removeFirst();
+        }
+
+        return System.nanoTime() - start;
+    }
+
+    // Verify that both implementations produce the same final playlist
+    static boolean verifyCorrectness(int size) {
+
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
+
+        for (int i = 0; i < size; i++) {
+            arrayList.add(i);
+            arrayDeque.addLast(i);
+        }
+
+        for (int i = 0; i < FRONT_OPERATIONS; i++) {
+            arrayList.add(0, -i - 1);
+            arrayDeque.addFirst(-i - 1);
+        }
+
+        for (int i = 0; i < FRONT_OPERATIONS; i++) {
+            arrayList.remove(0);
+            arrayDeque.removeFirst();
+        }
+
+        return new ArrayList<>(arrayDeque).equals(arrayList);
+    }
+
+    static void benchmark(int size) {
+
+        long arrayListTotal = 0;
+        long arrayDequeTotal = 0;
+
+        // Warm-up runs
+        for (int i = 0; i < 2; i++) {
+            testArrayList(size);
+            testArrayDeque(size);
+        }
+
+        // Repeated measurements
+        for (int i = 0; i < REPETITIONS; i++) {
+            arrayListTotal += testArrayList(size);
+            arrayDequeTotal += testArrayDeque(size);
+        }
+
+        double arrayListAverage =
+                arrayListTotal / (REPETITIONS * 1_000_000.0);
+
+        double arrayDequeAverage =
+                arrayDequeTotal / (REPETITIONS * 1_000_000.0);
+
+        System.out.printf(
+                "%-12d | %-18.3f | %-18.3f%n",
+                size, arrayListAverage, arrayDequeAverage
+        );
+
+        System.out.println(
+                "Correctness check: "
+                        + (verifyCorrectness(size) ? "PASSED" : "FAILED")
+        );
+
+        if (arrayDequeAverage > 0) {
+            System.out.printf(
+                    "Relative time ratio (ArrayList / ArrayDeque): %.2f%n",
+                    arrayListAverage / arrayDequeAverage
+            );
+        }
+
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+
+        int[] sizes = {1000, 5000, 10000};
+
+        System.out.println("Q7 - PERFORMANCE REDESIGN");
+        System.out.println("Problem: Frequent front insertion and removal");
+        System.out.println("Original: ArrayList");
+        System.out.println("Redesign: ArrayDeque");
+        System.out.println("Front operations: " + FRONT_OPERATIONS);
+        System.out.println("Repetitions: " + REPETITIONS);
+
+        System.out.println("\nAverage execution time in milliseconds");
+
+        System.out.printf(
+                "%-12s | %-18s | %-18s%n",
+                "Playlist Size", "ArrayList", "ArrayDeque"
+        );
+
+        System.out.println(
+                "------------------------------------------------------"
+        );
+
+        for (int size : sizes) {
+            benchmark(size);
+        }
+
+        System.out.println("Redesign experiment completed.");
+    }
+}
