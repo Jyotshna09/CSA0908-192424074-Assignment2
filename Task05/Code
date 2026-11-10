@@ -1,0 +1,121 @@
+
+import java.util.*;
+
+public class Q5 {
+
+    // Team class
+    static class Team {
+        String name;
+        int points;
+        int goalDifference;
+
+        Team(String name, int points, int goalDifference) {
+            this.name = name;
+            this.points = points;
+            this.goalDifference = goalDifference;
+        }
+
+        @Override
+        public String toString() {
+            return name + " | Points: " + points
+                    + " | Goal Difference: " + goalDifference;
+        }
+    }
+
+    // Generic Leaderboard class
+    static class Leaderboard<T> {
+
+        private List<T> items = new ArrayList<>();
+
+        public void add(T item) {
+            items.add(item);
+        }
+
+        public List<T> getRankedList(Comparator<? super T> comparator) {
+            List<T> result = new ArrayList<>(items);
+            result.sort(comparator);
+            return result;
+        }
+
+        public void display(Comparator<? super T> comparator) {
+            List<T> ranked = getRankedList(comparator);
+
+            for (int i = 0; i < ranked.size(); i++) {
+                System.out.println((i + 1) + ". " + ranked.get(i));
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("Q5 - GENERICS AND COMPARATOR LEADERBOARD");
+
+        // Comparator: points descending, goal difference descending,
+        // and team name ascending
+        Comparator<Team> rankingComparator =
+                Comparator.comparingInt((Team t) -> t.points).reversed()
+                .thenComparing(
+                        Comparator.comparingInt(
+                                (Team t) -> t.goalDifference
+                        ).reversed()
+                )
+                .thenComparing(t -> t.name);
+
+        // Create generic leaderboard
+        Leaderboard<Team> leaderboard = new Leaderboard<>();
+
+        // Add teams
+        leaderboard.add(new Team("Falcons", 30, 15));
+        leaderboard.add(new Team("Tigers", 25, 12));
+        leaderboard.add(new Team("Eagles", 30, 10));
+        leaderboard.add(new Team("Lions", 25, 12));
+        leaderboard.add(new Team("Wolves", 20, 8));
+
+        // Display leaderboard
+        System.out.println("\nFINAL LEADERBOARD:");
+
+        leaderboard.display(rankingComparator);
+
+        // Demonstrate comparator tie-breaking
+        System.out.println("\nTIE-BREAKING TEST:");
+
+        Team team1 = new Team("Falcons", 30, 15);
+        Team team2 = new Team("Eagles", 30, 10);
+
+        System.out.println("Team 1: " + team1);
+        System.out.println("Team 2: " + team2);
+
+        System.out.println(
+                "Comparator result: "
+                        + rankingComparator.compare(team1, team2)
+        );
+
+        // Demonstrate Comparable alternative
+        System.out.println("\nCOMPARABLE ALTERNATIVE:");
+
+        List<Integer> numbers = new ArrayList<>(
+                Arrays.asList(50, 20, 40, 10, 30)
+        );
+
+        Collections.sort(numbers);
+
+        System.out.println("Natural ascending order: " + numbers);
+
+        // Demonstrate wildcard usage
+        System.out.println("\nGENERIC WILDCARD TEST:");
+
+        List<Integer> scores = Arrays.asList(80, 90, 70, 85);
+
+        displayScores(scores);
+
+        System.out.println("\nProgram completed successfully.");
+    }
+
+    // Upper-bounded wildcard accepts Integer and other Number types
+    static void displayScores(List<? extends Number> scores) {
+
+        for (Number score : scores) {
+            System.out.println("Score: " + score);
+        }
+    }
+}
