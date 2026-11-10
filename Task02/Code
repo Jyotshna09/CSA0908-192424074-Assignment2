@@ -1,0 +1,192 @@
+
+import java.util.*;
+
+public class Q2 {
+
+    static volatile int result;
+
+    static void testArrayList(int size) {
+        ArrayList<Integer> list = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            list.add(i);
+        }
+
+        long start, end;
+
+        // Add at end
+        start = System.nanoTime();
+        for (int i = 0; i < 1000; i++) {
+            list.add(i);
+        }
+        end = System.nanoTime();
+        long addEnd = end - start;
+
+        // Insert at front
+        start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            list.add(0, i);
+        }
+        end = System.nanoTime();
+        long addFront = end - start;
+
+        // Insert in middle
+        start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            list.add(list.size() / 2, i);
+        }
+        end = System.nanoTime();
+        long addMiddle = end - start;
+
+        // Access k-th element
+        start = System.nanoTime();
+        for (int i = 0; i < 10000; i++) {
+            result = list.get(i % list.size());
+        }
+        end = System.nanoTime();
+        long access = end - start;
+
+        // Iterate
+        start = System.nanoTime();
+        for (Integer value : list) {
+            result = value;
+        }
+        end = System.nanoTime();
+        long iterate = end - start;
+
+        System.out.println("ArrayList:");
+        System.out.println("Add at end: " + addEnd + " ns");
+        System.out.println("Insert front: " + addFront + " ns");
+        System.out.println("Insert middle: " + addMiddle + " ns");
+        System.out.println("Access k-th: " + access + " ns");
+        System.out.println("Iteration: " + iterate + " ns");
+    }
+
+    static void testLinkedList(int size) {
+        LinkedList<Integer> list = new LinkedList<>();
+
+        for (int i = 0; i < size; i++) {
+            list.add(i);
+        }
+
+        long start, end;
+
+        // Add at end
+        start = System.nanoTime();
+        for (int i = 0; i < 1000; i++) {
+            list.add(i);
+        }
+        end = System.nanoTime();
+        long addEnd = end - start;
+
+        // Insert at front
+        start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            list.addFirst(i);
+        }
+        end = System.nanoTime();
+        long addFront = end - start;
+
+        // Insert in middle
+        start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            list.add(list.size() / 2, i);
+        }
+        end = System.nanoTime();
+        long addMiddle = end - start;
+
+        // Access k-th element
+        start = System.nanoTime();
+        for (int i = 0; i < 10000; i++) {
+            result = list.get(i % list.size());
+        }
+        end = System.nanoTime();
+        long access = end - start;
+
+        // Iterate
+        start = System.nanoTime();
+        for (Integer value : list) {
+            result = value;
+        }
+        end = System.nanoTime();
+        long iterate = end - start;
+
+        System.out.println("LinkedList:");
+        System.out.println("Add at end: " + addEnd + " ns");
+        System.out.println("Insert front: " + addFront + " ns");
+        System.out.println("Insert middle: " + addMiddle + " ns");
+        System.out.println("Access k-th: " + access + " ns");
+        System.out.println("Iteration: " + iterate + " ns");
+    }
+
+    static void testArrayDeque(int size) {
+        ArrayDeque<Integer> deque = new ArrayDeque<>();
+
+        for (int i = 0; i < size; i++) {
+            deque.addLast(i);
+        }
+
+        long start, end;
+
+        // Add at end
+        start = System.nanoTime();
+        for (int i = 0; i < 1000; i++) {
+            deque.addLast(i);
+        }
+        end = System.nanoTime();
+        long addEnd = end - start;
+
+        // Insert at front
+        start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            deque.addFirst(i);
+        }
+        end = System.nanoTime();
+        long addFront = end - start;
+
+        // Remove from front
+        start = System.nanoTime();
+        for (int i = 0; i < 100; i++) {
+            deque.removeFirst();
+        }
+        end = System.nanoTime();
+        long removeFront = end - start;
+
+        // Iterate
+        start = System.nanoTime();
+        for (Integer value : deque) {
+            result = value;
+        }
+        end = System.nanoTime();
+        long iterate = end - start;
+
+        System.out.println("ArrayDeque:");
+        System.out.println("Add at end: " + addEnd + " ns");
+        System.out.println("Add at front: " + addFront + " ns");
+        System.out.println("Remove front: " + removeFront + " ns");
+        System.out.println("Iteration: " + iterate + " ns");
+        System.out.println("Note: ArrayDeque does not support indexed access.");
+    }
+
+    public static void main(String[] args) {
+
+        int[] sizes = {1000, 5000, 10000};
+
+        for (int size : sizes) {
+
+            System.out.println("\n================================");
+            System.out.println("PLAYLIST SIZE: " + size);
+            System.out.println("================================");
+
+            testArrayList(size);
+            System.out.println();
+
+            testLinkedList(size);
+            System.out.println();
+
+            testArrayDeque(size);
+        }
+
+        System.out.println("\nExperiment completed successfully.");
+    }
+}
