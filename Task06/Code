@@ -1,0 +1,132 @@
+
+import java.util.*;
+
+public class Q6 {
+
+    static class Patient {
+        String name;
+        int severity;
+        long arrival;
+
+        Patient(String name, int severity, long arrival) {
+            this.name = name;
+            this.severity = severity;
+            this.arrival = arrival;
+        }
+
+        @Override
+        public String toString() {
+            return name + " (Severity: " + severity
+                    + ", Arrival: " + arrival + ")";
+        }
+    }
+
+    // PriorityQueue: lower severity number means higher priority
+    static PriorityQueue<Patient> createQueue() {
+        return new PriorityQueue<>(
+            Comparator.comparingInt((Patient p) -> p.severity)
+                      .thenComparingLong(p -> p.arrival)
+        );
+    }
+
+    static void testQueue(int numberOfPatients) {
+
+        PriorityQueue<Patient> queue = createQueue();
+
+        String[] names = {
+            "Aarav", "Diya", "Rohan", "Meera",
+            "Arjun", "Priya", "Kiran", "Anu"
+        };
+
+        int[] severities = {3, 1, 2, 1, 4, 2, 3, 1};
+
+        System.out.println("\nQueue size: " + numberOfPatients);
+
+        for (int i = 0; i < numberOfPatients; i++) {
+            queue.offer(new Patient(names[i], severities[i], i + 1));
+        }
+
+        System.out.println("Treatment order:");
+
+        while (!queue.isEmpty()) {
+            System.out.println(queue.poll());
+        }
+    }
+
+    // Fair priority queue using waiting-time promotion
+    static class FairPatient {
+        String name;
+        int severity;
+        long arrival;
+
+        FairPatient(String name, int severity, long arrival) {
+            this.name = name;
+            this.severity = severity;
+            this.arrival = arrival;
+        }
+    }
+
+    static void demonstrateFairness() {
+
+        System.out.println("\nSTARVATION AND FAIRNESS TEST");
+
+        long currentTime = 100;
+
+        List<FairPatient> patients = new ArrayList<>();
+
+        patients.add(new FairPatient("Critical Patient", 1, 95));
+        patients.add(new FairPatient("Moderate Patient", 3, 60));
+        patients.add(new FairPatient("Low Priority Patient", 5, 0));
+
+        // Every 20 time units of waiting improves priority by one level.
+        FairPatient selected = null;
+        int bestPriority = Integer.MAX_VALUE;
+
+        for (FairPatient p : patients) {
+
+            long waitingTime = currentTime - p.arrival;
+
+            int waitingPromotion = (int) (waitingTime / 20);
+
+            int effectivePriority = Math.max(
+                1, p.severity - waitingPromotion
+            );
+
+            System.out.println(
+                p.name + " | Original severity: " + p.severity
+                + " | Effective priority: " + effectivePriority
+            );
+
+            if (effectivePriority < bestPriority
+                    || (effectivePriority == bestPriority
+                    && (selected == null || p.arrival < selected.arrival))) {
+
+                bestPriority = effectivePriority;
+                selected = p;
+            }
+        }
+
+        System.out.println("Selected patient: " + selected.name);
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("Q6 - HOSPITAL PATIENT TRIAGE SYSTEM");
+
+        // Test different queue sizes
+        testQueue(3);
+        testQueue(5);
+        testQueue(8);
+
+        // Fairness demonstration
+        demonstrateFairness();
+
+        System.out.println("\nDATA STRUCTURE ALTERNATIVES");
+
+        System.out.println("1. PriorityQueue - Severity-based treatment.");
+        System.out.println("2. LinkedList - Sorted insertion, FIFO within priority.");
+        System.out.println("3. Five FIFO queues - One queue for each severity level.");
+
+        System.out.println("\nProgram completed successfully.");
+    }
+}
