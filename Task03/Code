@@ -1,0 +1,121 @@
+
+import java.util.HashSet;
+import java.util.Set;
+
+// Incorrect implementation: equals() is overridden,
+// but hashCode() is not consistent with equals().
+class BrokenStudent {
+    String regNo;
+    String name;
+
+    private static int nextHash = 1;
+    private final int identityHash = nextHash++;
+
+    BrokenStudent(String regNo, String name) {
+        this.regNo = regNo;
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BrokenStudent))
+            return false;
+
+        return regNo.equals(((BrokenStudent) o).regNo);
+    }
+
+    @Override
+    public int hashCode() {
+        return identityHash;
+    }
+}
+
+// Correct implementation
+class Student {
+    private final String regNo;
+    private final String name;
+
+    Student(String regNo, String name) {
+        this.regNo = regNo;
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (!(o instanceof Student))
+            return false;
+
+        Student other = (Student) o;
+        return regNo.equals(other.regNo);
+    }
+
+    @Override
+    public int hashCode() {
+        return regNo.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return regNo + " " + name;
+    }
+}
+
+public class Q3 {
+
+    public static void main(String[] args) {
+
+        System.out.println("Q3 - HASHSET AND EQUALS-HASHCODE");
+
+        // TEST 1: Incorrect hashCode implementation
+        Set<BrokenStudent> brokenSet = new HashSet<>();
+
+        brokenSet.add(new BrokenStudent("101", "Arun"));
+        brokenSet.add(new BrokenStudent("102", "Divya"));
+        brokenSet.add(new BrokenStudent("101", "Arun"));
+
+        System.out.println("\nTEST 1: Without correct hashCode()");
+        System.out.println("Expected size: 3");
+        System.out.println("Actual size: " + brokenSet.size());
+
+        // TEST 2: Correct implementation
+        Set<Student> correctSet = new HashSet<>();
+
+        correctSet.add(new Student("101", "Arun"));
+        correctSet.add(new Student("102", "Divya"));
+        correctSet.add(new Student("101", "Arun"));
+
+        System.out.println("\nTEST 2: With correct hashCode()");
+        System.out.println("Expected size: 2");
+        System.out.println("Actual size: " + correctSet.size());
+        System.out.println("Unique students: " + correctSet);
+
+        // TEST 3: Changing a field after insertion
+        Student changingStudent = new Student("103", "Kumar");
+
+        Set<Student> mutableTest = new HashSet<>();
+        mutableTest.add(changingStudent);
+
+        System.out.println("\nTEST 3: Immutable registration number");
+        System.out.println("Before modification: "
+                + mutableTest.contains(changingStudent));
+
+        System.out.println("Registration number cannot be changed "
+                + "because it is final.");
+
+        // COMPLETE THE CODE: Before and after comparison
+        System.out.println("\nCOMPLETE THE CODE DEMONSTRATION");
+
+        Set<Student> attendance = new HashSet<>();
+
+        attendance.add(new Student("192311001", "Arun"));
+        attendance.add(new Student("192311002", "Divya"));
+        attendance.add(new Student("192311001", "Arun"));
+
+        System.out.println("Unique students: " + attendance.size());
+
+        System.out.println("\nExperiment completed successfully.");
+    }
+}
