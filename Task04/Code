@@ -1,0 +1,139 @@
+
+import java.util.*;
+import java.util.function.Supplier;
+
+public class Q4 {
+
+    static final int LOOKUPS = 100000;
+    static final int REPETITIONS = 3;
+
+    static void benchmark(String mapName,
+                          Supplier<Map<String, Integer>> factory,
+                          int size) {
+
+        long insertionTime = 0;
+        long lookupTime = 0;
+        long iterationTime = 0;
+        long checksum = 0;
+
+        for (int r = 0; r < REPETITIONS; r++) {
+
+            Map<String, Integer> inventory = factory.get();
+
+            // INSERTION TEST
+            long start = System.nanoTime();
+
+            for (int i = 0; i < size; i++) {
+                inventory.put("ITEM" + i, i + 100);
+            }
+
+            insertionTime += System.nanoTime() - start;
+
+            // LOOKUP TEST
+            start = System.nanoTime();
+
+            for (int i = 0; i < LOOKUPS; i++) {
+                int index = i % size;
+                Integer value = inventory.get("ITEM" + index);
+
+                if (value != null) {
+                    checksum += value;
+                }
+            }
+
+            lookupTime += System.nanoTime() - start;
+
+            // ITERATION TEST
+            start = System.nanoTime();
+
+            long iterationSum = 0;
+
+            for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
+                iterationSum += entry.getValue();
+            }
+
+            iterationTime += System.nanoTime() - start;
+
+            checksum += iterationSum;
+        }
+
+        System.out.printf(
+            "%-15s | %-10d | %-15.3f | %-15.3f | %-15.3f%n",
+            mapName,
+            size,
+            insertionTime / (REPETITIONS * 1_000_000.0),
+            lookupTime / (REPETITIONS * 1_000_000.0),
+            iterationTime / (REPETITIONS * 1_000_000.0)
+        );
+
+        System.out.println("Order sample: " + getOrderSample(factory, size));
+        System.out.println("Checksum: " + checksum);
+        System.out.println();
+    }
+
+    static List<String> getOrderSample(
+            Supplier<Map<String, Integer>> factory, int size) {
+
+        Map<String, Integer> inventory = factory.get();
+
+        for (int i = 0; i < size; i++) {
+            inventory.put("ITEM" + i, i + 100);
+        }
+
+        List<String> sample = new ArrayList<>();
+
+        for (String key : inventory.keySet()) {
+            sample.add(key);
+
+            if (sample.size() == 5) {
+                break;
+            }
+        }
+
+        return sample;
+    }
+
+    public static void main(String[] args) {
+
+        int[] sizes = {1000, 10000, 50000};
+
+        System.out.println("Q4 - MAP IMPLEMENTATION COMPARISON");
+        System.out.println("Lookup operations per repetition: " + LOOKUPS);
+        System.out.println("Repetitions: " + REPETITIONS);
+
+        System.out.println("\nAverage time in milliseconds");
+        System.out.printf(
+            "%-15s | %-10s | %-15s | %-15s | %-15s%n",
+            "Map Type", "Size", "Insertion", "Lookup", "Iteration"
+        );
+
+        System.out.println(
+            "--------------------------------------------------------------------------"
+        );
+
+        for (int size : sizes) {
+
+            System.out.println("\nINVENTORY SIZE: " + size);
+
+            benchmark(
+                "HashMap",
+                HashMap::new,
+                size
+            );
+
+            benchmark(
+                "TreeMap",
+                TreeMap::new,
+                size
+            );
+
+            benchmark(
+                "LinkedHashMap",
+                LinkedHashMap::new,
+                size
+            );
+        }
+
+        System.out.println("Benchmark completed successfully.");
+    }
+}
